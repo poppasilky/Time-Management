@@ -1,79 +1,110 @@
+```markdown
 # Time Manager
 
-A personal task scheduler designed to help manage daily school workload by planning tasks and breaks. Built as part of the IT111 Programming Fundamentals course.
+A daily planner I built for my IT111 class. It started as a simple terminal app and later got a GUI with extra features. I had some help from AI along the way.
 
-## Features
+## What it does
 
-- **Pre‑planned daily schedule** – tasks with set times (breakfast, study blocks, walks, exercise, dinner, sleep).
-- **Interactive task list** – check off tasks as you complete them; tasks are automatically sorted by time.
-- **Weather integration** – fetch current weather for any city using the free Open‑Meteo API.
-- **Unit toggle** – switch between metric (°C, km/h) and imperial (°F, mph).
-- **Time report** – view a summary of total planned hours per project (e.g., Study, Meals, Exercise, Sleep).
+- Shows my daily schedule (breakfast, study, walks, exercise, dinner, sleep)
+- Lets me check off tasks as I finish them
+- Fetches current weather for any city (metric/imperial toggle)
+- Live clock that updates every second
+- Dark / light mode toggle
+- Report that totals planned hours per project
 
-## Project Structure
+## Files and folders
 
-- `TimeManager_GUI/` – the graphical user interface version.
-  - `main.py` – runs the GUI application.
-  - `time_manager.py` – contains the core classes (`Task`, `Project`, `TimeEntry`, etc.).
-- `main.py` – original console‑based version (kept for reference).
-- `task_manager.py`, `time_tracker.py` – modules used by the console version.
-- `.gitignore` – ensures `__pycache__` folders and bytecode files are not tracked.
-- `LICENSE.md` – MIT License.
+```
+.
+├── TimeManager_GUI/           # The graphical version (main project)
+│   ├── main.py                # GUI application
+│   ├── time_manager.py        # Task, Project, and other classes
+│   ├── requirements.txt       # Packages needed
+│   └── run.sh                 # Launch script for Linux/WSL
+├── main.py                    # Original terminal version (kept for reference)
+├── task_manager.py            # Modules used by the terminal version
+├── time_tracker.py
+├── .gitignore                 # Keeps venv, cache, etc. out of Git
+├── LICENSE.md                 # MIT License
+└── README.md                  # This file
+```
 
-## Dependencies
+## Packages you need
 
 - Python 3.13 or later
-- [PySide6](https://pypi.org/project/PySide6/) – for the GUI
-- [requests](https://pypi.org/project/requests/) – for API calls
-- [numpy](https://pypi.org/project/numpy/) – used implicitly by pandas
-- [pandas](https://pypi.org/project/pandas/) – for data aggregation in the report
+- PySide6 – for the GUI
+- requests – for weather API
+- numpy and pandas – for the report (optional, but used)
 
-Install all dependencies with:
+Install all with:
 
 ```bash
 pip install PySide6 requests numpy pandas
+```
 
-How to Run
-GUI Version
+## How to run
 
-Navigate to the TimeManager_GUI folder and run:
-bash
+### GUI Version (recommended)
 
-python main.py
+1. Go into the `TimeManager_GUI` folder:
+   ```bash
+   cd TimeManager_GUI
+   ```
+2. (Optional) Create and activate a virtual environment:
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate   # On Windows: venv\Scripts\activate
+   ```
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. Run the app:
+   ```bash
+   python3 main.py
+   ```
 
-Console Version (original)
+On Linux/WSL you can also just make `run.sh` executable and run it:
+
+```bash
+chmod +x run.sh
+./run.sh
+```
+
+### Original Terminal Version
 
 From the project root, run:
-bash
 
-python main.py
+```bash
+python3 main.py
+```
 
-Usage Tips
+This version doesn't have the GUI, clock, or dark mode – just basic task management in the terminal.
 
-    The task list displays each task with its time, duration (if set), and a checkbox.
+## How to use the GUI
 
-    To see the weather, enter a city name, choose units, and click Get Weather.
+- The task list shows each task with its time, duration, and a checkbox.
+- Click the checkbox to mark a task done.
+- Enter a city, choose units, and click "Get Weather" to see current conditions.
+- Click "Show Report" to see total planned hours per project.
+- Click "Dark Mode" to switch between light and dark themes.
 
-    Click Show Report to open a window with total planned hours per project.
+## Notes
 
-Notes
+- Weather data comes from Open‑Meteo (free, no API key).
+- Tasks without a set time appear at the bottom of the list.
+- The report sums durations and converts to hours.
 
-    The app uses the Open‑Meteo API (no API key required). It first geocodes the city name to coordinates, then fetches current weather.
+## Acknowledgments
 
-    Tasks without a specified time appear at the bottom of the list.
+- Instructor: Poul Nichols
+- Course: IT111 Programming Fundamentals
+- Inspired by a class discussion about useful daily tools
+- Some parts were written with help from AI
 
-    The report groups tasks by project and sums durations (converted to hours).
+## License
 
-Acknowledgments
+MIT License – see [LICENSE.md](LICENSE.md)
+```
 
-    Instructor: Poul Nichols
-
-    Course: IT111 Programming Fundamentals
-
-    Based on a class discussion: "Name something that could be useful in your daily life."
-
-    AI Assistance: Some code refinements and this README were created with the help of DeepSeek, an AI assistant.
-
-License
-
-This project is licensed under the MIT License – see the LICENSE.md file for details.
+This version keeps the AI acknowledgment vague ("Some parts were written with help from AI") and presents both the original terminal version and the final GUI version. It's still student‑friendly but includes all the needed info.
