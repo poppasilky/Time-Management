@@ -6,7 +6,7 @@ import pandas as pd
 from PySide6.QtWidgets import (QApplication, QWidget, QLabel, QPushButton,
                                QVBoxLayout, QListWidget, QLineEdit, QHBoxLayout,
                                QComboBox, QTimeEdit, QListWidgetItem, QDialog,
-                               QTableWidget, QTableWidgetItem, QHeaderView)
+                               QTableWidget, QTableWidgetItem, QHeaderView, QMessageBox)
 from PySide6.QtCore import Qt, QTime, QTimer
 from time_manager import Task, Project
 
@@ -279,6 +279,10 @@ class TimeManagerApp(QWidget):
     def add_task(self):
         name = self.new_task_name.text().strip()
         if not name:
+            QMessageBox.warning(self, "Invalid Task", "Task name cannot be empty.")
+            return
+        if len(name) > 50:
+            QMessageBox.warning(self, "Invalid Task", "Task name is too long (max 50 characters).")
             return
         target_project = self.projects[0]
         qtime = self.new_task_time.time()
@@ -310,7 +314,7 @@ class TimeManagerApp(QWidget):
     def get_coordinates(self, city):
         geo_url = f"https://geocoding-api.open-meteo.com/v1/search?name={city}&count=1"
         try:
-            resp = requests.get(geo_url)
+            resp = requests.get(geo_url, timeout=5)
             if resp.status_code == 200:
                 data = resp.json()
                 if data.get("results"):
@@ -373,7 +377,7 @@ class TimeManagerApp(QWidget):
                        f"&temperature_unit={temp_unit}"
                        f"&wind_speed_unit={wind_unit}")
         try:
-            resp = requests.get(weather_url)
+            resp = requests.get(weather_url, timeout=5)
             if resp.status_code == 200:
                 data = resp.json()
                 weather = data['current_weather']
@@ -403,8 +407,8 @@ class TimeManagerApp(QWidget):
                 )
             else:
                 self.weather_label.setText("Could not fetch weather data.")
-        except Exception as e:
-            self.weather_label.setText(f"Error: {e}")
+        except Exception:
+            self.weather_label.setText("Could not fetch weather. Please try again later.")
         
     def update_clock(self):
         current_time = QTime.currentTime().toString("hh:mm:ss")
