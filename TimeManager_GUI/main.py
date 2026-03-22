@@ -1,4 +1,5 @@
 import sys
+import os
 import requests
 import numpy as np
 import pandas as pd
@@ -6,7 +7,7 @@ from PySide6.QtWidgets import (QApplication, QWidget, QLabel, QPushButton,
                                QVBoxLayout, QListWidget, QLineEdit, QHBoxLayout,
                                QComboBox, QTimeEdit, QListWidgetItem, QDialog,
                                QTableWidget, QTableWidgetItem, QHeaderView)
-from PySide6.QtCore import Qt, QTime
+from PySide6.QtCore import Qt, QTime, QTimer
 from time_manager import Task, Project
 
 class ReportDialog(QDialog):
@@ -36,7 +37,76 @@ class TimeManagerApp(QWidget):
         super().__init__()
         self.setWindowTitle("Daily Planner")
         self.setGeometry(100, 100, 600, 650)
+        self.light_style = """
+            QWidget {
+                background-color: #f0f2f5;
+                color: #333;
+                font-family: 'Segoe UI', 'Arial', sans-serif;
+                font-size: 12px;
+    }
+            QListWidget {
+                background-color: white;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+    }
+            QPushButton {
+                background-color: #4a90e2;
+                color: white;
+                border: none;
+                padding: 6px 12px;
+                border-radius: 4px;
+                font-weight: bold;
+    }
+            QPushButton:hover {
+                background-color: #3b7ac2;
+    }
+            QLineEdit, QTimeEdit, QComboBox {
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                padding: 4px;
+                background: white;
+    }
+            QLabel {
+                color: #333;
+    }
+"""
 
+        self.dark_style = """
+            QWidget {
+                background-color: #2b2b2b;
+                color: #f0f0f0;
+                font-family: 'Segoe UI', 'Arial', sans-serif;
+                font-size: 12px;
+    }
+            QListWidget {
+                background-color: #3c3c3c;
+                border: 1px solid #555;
+                border-radius: 4px;
+    }
+            QPushButton {
+                background-color: #4a90e2;
+                color: white;
+                border: none;
+                padding: 6px 12px;
+                border-radius: 4px;
+                font-weight: bold;
+    }
+            QPushButton:hover {
+                background-color: #6a1b9a;
+    }
+            QLineEdit, QTimeEdit, QComboBox {
+                border: 1px solid #555;
+                border-radius: 4px;
+                padding: 4px;
+                background: #3c3c3c;
+                color: #f0f0f0;
+    }
+            QLabel {
+                color: #f0f0f0;
+    }
+""" 
+        self.setStyleSheet(self.light_style)
+  
         self.projects = []
         self.setup_sample_tasks()
 
@@ -63,9 +133,14 @@ class TimeManagerApp(QWidget):
         input_layout.addWidget(self.add_button)
 
         # Report button
+        button_row = QHBoxLayout()
         self.report_button = QPushButton("Show Report")
         self.report_button.clicked.connect(self.show_report)
-
+        self.toggle_theme_button = QPushButton("Dark Mode")
+        self.toggle_theme_button.clicked.connect(self.toggle_theme)
+        button_row.addWidget(self.report_button)
+        button_row.addWidget(self.toggle_theme_button)
+        
         # ----- Weather Section -----
         # City row
         city_layout = QHBoxLayout()
@@ -75,7 +150,7 @@ class TimeManagerApp(QWidget):
         self.city_input.setText("Seattle")
         city_layout.addWidget(self.city_input)
 
-        # Units & Weather button row (units on left, button on right)
+        # Units & Weather button row (units on left, clock, then button on right)
         units_weather_layout = QHBoxLayout()
         units_weather_layout.addWidget(QLabel("Units:"))
         self.unit_combo = QComboBox()
@@ -84,11 +159,18 @@ class TimeManagerApp(QWidget):
         self.unit_combo.currentIndexChanged.connect(self.on_unit_changed)
         units_weather_layout.addWidget(self.unit_combo)
 
-        # Push the button to the right
+        # Add the clock label
+        self.clock_label = QLabel()
+        self.clock_label.setAlignment(Qt.AlignRight)
+        units_weather_layout.addWidget(self.clock_label)
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.update_clock)
+        self.timer.start(1000)
+        self.update_clock()
         units_weather_layout.addStretch()
 
         self.weather_button = QPushButton("Get Weather")
-        self.weather_button.setFixedWidth(120)  # Half typical button size
+        self.weather_button.setFixedWidth(120)
         self.weather_button.clicked.connect(self.fetch_weather)
         units_weather_layout.addWidget(self.weather_button)
 
@@ -102,7 +184,7 @@ class TimeManagerApp(QWidget):
         layout.addWidget(QLabel("Today's Plan (sorted by time):"))
         layout.addWidget(self.task_list)
         layout.addLayout(input_layout)
-        layout.addWidget(self.report_button)
+        layout.addLayout(button_row)
         layout.addLayout(city_layout)
         layout.addLayout(units_weather_layout)   # new combined row
         layout.addWidget(self.weather_label)
@@ -164,6 +246,14 @@ class TimeManagerApp(QWidget):
 
         self.projects = [study_project, meals_project, exercise_project, sleep_project]
 
+    def toggle_theme(self):
+        if self.toggle_theme_button.text() == "Dark Mode":
+            self.setStyleSheet(self.dark_style)
+            self.toggle_theme_button.setText("Light Mode")
+        else:
+            self.setStyleSheet(self.light_style)
+            self.toggle_theme_button.setText("Dark Mode")
+
     def refresh_task_list(self):
         self.task_list.clear()
         all_tasks = []
@@ -214,6 +304,7 @@ class TimeManagerApp(QWidget):
         project_hours = df.groupby('project')['duration_minutes'].sum() / 60.0
         plot_data = project_hours.to_dict()
         dlg = ReportDialog(plot_data, self)
+        dlg.setStyleSheet(self.styleSheet())
         dlg.exec()
 
     def get_coordinates(self, city):
@@ -314,7 +405,11 @@ class TimeManagerApp(QWidget):
                 self.weather_label.setText("Could not fetch weather data.")
         except Exception as e:
             self.weather_label.setText(f"Error: {e}")
-
+        
+    def update_clock(self):
+        current_time = QTime.currentTime().toString("hh:mm:ss")
+        self.clock_label.setText(current_time)
+        
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = TimeManagerApp()
