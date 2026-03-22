@@ -12,22 +12,9 @@ A daily planner I built for my IT111 class. It started as a simple terminal app 
 - Dark / light mode toggle
 - Report that totals planned hours per project
 
-## Files and folders
+## Project structure
 
-```
-.
-├── TimeManager_GUI/           # The graphical version (main project)
-│   ├── main.py                # GUI application
-│   ├── time_manager.py        # Task, Project, and other classes
-│   ├── requirements.txt       # Packages needed
-│   └── run.sh                 # Launch script for Linux/WSL
-├── main.py                    # Original terminal version (kept for reference)
-├── task_manager.py            # Modules used by the terminal version
-├── time_tracker.py
-├── .gitignore                 # Keeps venv, cache, etc. out of Git
-├── LICENSE.md                 # MIT License
-└── README.md                  # This file
-```
+The main GUI code is in the `TimeManager_GUI/` folder. The original terminal version is still in the root folder (`main.py`, `task_manager.py`, `time_tracker.py`) for reference.`
 
 ## Packages you need
 
